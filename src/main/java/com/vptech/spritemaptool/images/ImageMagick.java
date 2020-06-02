@@ -31,7 +31,7 @@ public class ImageMagick {
         commandBuilder.append(GEOMETRY_1_1);
         commandBuilder.append(SPACE_STR);
         commandBuilder.append("-trim ");
-        commandBuilder.append("-tile 4x3 ");
+        commandBuilder.append("-tile 3x4 ");
         commandBuilder.append(String.join(" ", imageNames));
         commandBuilder.append(" ../result.png");
 

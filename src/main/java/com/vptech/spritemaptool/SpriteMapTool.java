@@ -1,7 +1,9 @@
 package com.vptech.spritemaptool;
 
+import com.vptech.spritemaptool.images.ImageEngine;
 import com.vptech.spritemaptool.images.ImageInfo;
 import com.vptech.spritemaptool.images.ImageMagick;
+import io.vavr.collection.Seq;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -67,6 +69,28 @@ class SpriteMapTool {
         return line;
     }
 
+    public void buildSpriteMap(String[] args) {
+        CommandLine line = parseArguments(args);
+
+        if (line.hasOption(WORK_FOLDER_PATH)) {
+            final String folderPath = line.getOptionValue(WORK_FOLDER_PATH);
+            try {
+                final List<String> imagePaths = getImageInfoList(folderPath).stream()
+                                                                            .sorted(Comparator.comparing(im -> (im.getHeight() * im.getWidth())))
+                                                                            .map(ImageInfo::getPath)
+                                                                            .map(Path::toString)
+                                                                            .collect(Collectors.toList());
+
+                ImageEngine.concatImages(io.vavr.collection.List.ofAll(imagePaths));
+            } catch (IOException e) {
+                System.out.println("Can't read images from folder");
+                e.printStackTrace();
+            }
+        } else {
+            printAppHelp();
+        }
+    }
+
     private static List<ImageInfo> getImageInfoList(String folderPath) throws IOException {
         try (Stream<Path> paths = Files.walk(Paths.get(folderPath))) {
             return paths.filter(Files::isRegularFile)
@@ -78,7 +102,7 @@ class SpriteMapTool {
 
     private static List<String> getImages(List<ImageInfo> imageInfoList) {
         return imageInfoList.stream()
-                            .sorted(Comparator.comparing(ImageInfo::getHeight))
+                            .sorted(Comparator.comparing(im -> -(im.getHeight() + im.getWidth())))
                             .map(i -> i.getPath().getFileName().toString())
                             .collect(Collectors.toList());
     }
