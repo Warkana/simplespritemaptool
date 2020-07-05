@@ -20,21 +20,23 @@ import io.vavr.control.Option;
 
 public class ImageEngine {
 
-    public static void concatImages(Seq<String> imagePaths) {
+    public static Seq<ResourceData> concatImages(Seq<String> imagePaths) {
         final Map<String, BufferedImage> images = imagePaths.toMap(ImageEngine::readImage);
         final long area = images.map(im -> im._2.getHeight() * im._2.getWidth()).sum().longValue();
-        final int maxWidth = 2000;
-        final int maxHeight = 2000;
+        final int maxWidth = 350;
+        final int maxHeight = 400;
 
         final Seq<ResourceData> imageDescriptorList = getImageDescriptorByMaxRect(images, maxWidth, maxHeight);
         final BufferedImage concatImage = new BufferedImage(maxWidth, maxHeight, BufferedImage.TYPE_4BYTE_ABGR);
         final Graphics2D g2d = concatImage.createGraphics();
 
         imageDescriptorList.forEach(imData -> drawImage(imData, g2d, images));
+        System.out.println(new Gson().toJson(imageDescriptorList.toJavaList()));
 
         g2d.dispose();
         try {
             ImageIO.write(concatImage, "png", new File("./concat.png"));
+            return imageDescriptorList;
         } catch (IOException e) {
             throw new RuntimeException("Can't save spritemap", e);
         }
@@ -130,7 +132,7 @@ public class ImageEngine {
                                                     : Option.of(new ImageBox.ImageSpecBuilder().withX(emptyRect.getX())
                                                                                                .withY(rect.getY() + rect.getH())
                                                                                                .withWidth(emptyRect.getW())
-                                                                                               .withHeight(rect.getY() + rect.getH() - emptyRect.getY())
+                                                                                               .withHeight(emptyRect.getY() + emptyRect.getH() - (rect.getY() + rect.getH()))
                                                                                                .build());
     }
 
