@@ -1,7 +1,7 @@
 package com.vptech.spritemaptool.descriptor.model;
 
 public class ResourceData {
-    private String fileName;
+    private transient String fileName;
     private ImageBox frame;
     private Boolean rotated;
     private Boolean trimmed;

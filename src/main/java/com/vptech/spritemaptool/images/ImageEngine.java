@@ -3,11 +3,13 @@ package com.vptech.spritemaptool.images;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import javax.imageio.ImageIO;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.vptech.spritemaptool.descriptor.model.ImageBox;
 import com.vptech.spritemaptool.descriptor.model.ResourceData;
 import com.vptech.spritemaptool.descriptor.model.Size;
@@ -20,11 +22,11 @@ import io.vavr.control.Option;
 
 public class ImageEngine {
 
-    public static void concatImages(Seq<String> imagePaths) {
+    public static JsonObject concatImages(Seq<String> imagePaths, String descriptorFileName) {
         final Map<String, BufferedImage> images = imagePaths.toMap(ImageEngine::readImage);
-        final long area = images.map(im -> im._2.getHeight() * im._2.getWidth()).sum().longValue();
-        final int maxWidth = 2000;
-        final int maxHeight = 2000;
+        //final long area = images.map(im -> im._2.getHeight() * im._2.getWidth()).sum().longValue();
+        final int maxWidth = 350;
+        final int maxHeight = 400;
 
         final Seq<ResourceData> imageDescriptorList = getImageDescriptorByMaxRect(images, maxWidth, maxHeight);
         final BufferedImage concatImage = new BufferedImage(maxWidth, maxHeight, BufferedImage.TYPE_4BYTE_ABGR);
@@ -32,12 +34,48 @@ public class ImageEngine {
 
         imageDescriptorList.forEach(imData -> drawImage(imData, g2d, images));
 
+        final JsonObject frames = getFramesJsonObject(imageDescriptorList);
+        final JsonObject generalObject = new JsonObject();
+        generalObject.add("frames", frames);
+        final String formattedFileName = descriptorFileName.concat(".png");
+        generalObject.add("meta", getMeta(new Size(maxWidth, maxHeight), descriptorFileName));
+
         g2d.dispose();
-        try {
-            ImageIO.write(concatImage, "png", new File("./concat.png"));
+        try(FileWriter jsonWriter = new FileWriter("./".concat(descriptorFileName.concat(".json")))) {
+            ImageIO.write(concatImage, "png", new File("./".concat(formattedFileName)));
+            new Gson().toJson(generalObject, jsonWriter);
+
+            return generalObject;
         } catch (IOException e) {
             throw new RuntimeException("Can't save spritemap", e);
         }
+    }
+
+    private static JsonObject getMeta(Size size, String spritemapName) {
+        final JsonObject metaObject = new JsonObject();
+        metaObject.addProperty("app", "https://github.com/VoldMaire/simplespritemaptool");
+        metaObject.addProperty("version", "1.0");
+        metaObject.addProperty("image", spritemapName);
+        final JsonParser parser = new JsonParser();
+        metaObject.add("size", parser.parse(new Gson().toJson(size)));
+        metaObject.addProperty("scale", "1");
+        return metaObject;
+    }
+
+    private static JsonObject getFramesJsonObject(Seq<ResourceData> imageDescriptorList) {
+        final JsonObject framesData = new JsonObject();
+        imageDescriptorList.toMap(ResourceData::getFileName, ImageEngine::resourceToJson)
+                           .forEach(resData -> addObject(framesData, resData._1(), resData._2()));
+        return framesData;
+    }
+
+    private static String resourceToJson(ResourceData resource) {
+        return new Gson().toJson(resource);
+    }
+
+    private static void addObject(JsonObject obj, String fileName, String resource) {
+        final JsonParser parser = new JsonParser();
+        obj.add(fileName, parser.parse(resource));
     }
 
     private static void drawImage(ResourceData imageData, Graphics2D g2d, Map<String, BufferedImage> images) {
@@ -130,7 +168,7 @@ public class ImageEngine {
                                                     : Option.of(new ImageBox.ImageSpecBuilder().withX(emptyRect.getX())
                                                                                                .withY(rect.getY() + rect.getH())
                                                                                                .withWidth(emptyRect.getW())
-                                                                                               .withHeight(rect.getY() + rect.getH() - emptyRect.getY())
+                                                                                               .withHeight(emptyRect.getY() + emptyRect.getH() - (rect.getY() + rect.getH()))
                                                                                                .build());
     }
 
