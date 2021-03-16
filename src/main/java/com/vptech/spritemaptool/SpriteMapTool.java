@@ -1,5 +1,6 @@
 package com.vptech.spritemaptool;
 
+import com.google.gson.JsonObject;
 import com.vptech.spritemaptool.images.ImageEngine;
 import com.vptech.spritemaptool.images.ImageInfo;
 import com.vptech.spritemaptool.images.ImageMagick;
@@ -25,9 +26,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.imageio.ImageIO;
 
-class SpriteMapTool {
+public class SpriteMapTool {
 
     private final static String WORK_FOLDER_PATH = "imagefolder";
+    private final static String DESTINATION_FILE_NAME = "destinationfilename";
 
     void run(String[] args) {
 
@@ -70,10 +72,11 @@ class SpriteMapTool {
     }
 
     public void buildSpriteMap(String[] args) {
-        CommandLine line = parseArguments(args);
+        final CommandLine line = parseArguments(args);
 
         if (line.hasOption(WORK_FOLDER_PATH)) {
             final String folderPath = line.getOptionValue(WORK_FOLDER_PATH);
+            final String destFileName = line.getOptionValue(DESTINATION_FILE_NAME);
             try {
                 final List<String> imagePaths = getImageInfoList(folderPath).stream()
                                                                             .sorted(Comparator.comparing(im -> (im.getHeight() * im.getWidth())))
@@ -81,7 +84,8 @@ class SpriteMapTool {
                                                                             .map(Path::toString)
                                                                             .collect(Collectors.toList());
 
-                ImageEngine.concatImages(io.vavr.collection.List.ofAll(imagePaths));
+                final JsonObject descriptor = ImageEngine.concatImages(io.vavr.collection.List.ofAll(imagePaths), destFileName);
+
             } catch (IOException e) {
                 System.out.println("Can't read images from folder");
                 e.printStackTrace();
@@ -91,7 +95,7 @@ class SpriteMapTool {
         }
     }
 
-    private static List<ImageInfo> getImageInfoList(String folderPath) throws IOException {
+    static List<ImageInfo> getImageInfoList(String folderPath) throws IOException {
         try (Stream<Path> paths = Files.walk(Paths.get(folderPath))) {
             return paths.filter(Files::isRegularFile)
                         .filter(SpriteMapTool::isImage)
@@ -138,6 +142,7 @@ class SpriteMapTool {
         final Options options = new Options();
 
         options.addOption("f", WORK_FOLDER_PATH, true, "folder path to load data from");
+        options.addOption("d", DESTINATION_FILE_NAME, true, "destination file name");
         return options;
     }
 
