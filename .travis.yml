@@ -13,7 +13,7 @@ deploy:
   provider: releases
   api_key:
     secure: "rGZZiHbpXIfgcLdoT0a75ssFFM4GXIDqW66VejFYTVOFaXKgZfu0AMFdB2efuiB1wN3nIQqHy2KWCcYvmRvVufiWZg/4fu1meEswdEbO5MfCZS2xaBJ6/77tAPP3aithYRsbe4v8yd0nPFkIqJ1M1lBXDWkk1UKLrT1BswBQSqfLIoXxXSxwvH3NKZiQVAi+L828u8j73ZXH9X6WZTlLsGGe9A/2FoWQN8+JD6IIWLKpyM5w4caiHcpt1q7Mon5EgSb03+bgew6AzfWFjjUjztEozpkvDxkb2E1K+jU+UIKwfHcE7I99VkITcJnfa1Lv+LlWMY/bFelRwmRtq8XHGiaAlI6vyjrtfsX37YM/iFwikOasvEI3nAnFqMU8udKICXdgdRUyGAOv4h1E1fh0spnCTI+6OsIKGQaal1/tQ8m15hU0jA1XfTS4fTOM0j6DACYRsGkZNjrd1/b0QKaqHDFVxvUh0Jprr2hcxF3X1zi1zmT4ulOxyzDLbvqw0O1WnVP8SJw781K/JcM8XwLSt7wR5ytnJY1A87u/nxBo/94OGLVhWMLKdPoanFiGqq+O/xKKKpwLKiVq3je8w5kDm7KIg097NL5eGPR0M9CR/tv2yHxv2DUa8+fdV9DhrT2TOzigaC3WrAnAOeQcXnQ+M8dilJPSwA089Ye2G9L7U/Q="
-  file: 'spritemap-1.0-SNAPSHOT.jar'
+  file: 'build/libs/spritemap-1.0-SNAPSHOT.jar'
   skip_cleanup: true
   on:
     tags: true
