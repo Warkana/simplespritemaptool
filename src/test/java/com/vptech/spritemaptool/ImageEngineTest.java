@@ -21,27 +21,6 @@ import static org.junit.Assert.assertEquals;
 
 public class ImageEngineTest {
 
-    @Test
-    public void testFlatMap() {
-        final Seq<Integer> list = List.of(1, 2, 3, 4, 5).flatMap(ImageEngineTest::addTenToList);
-        list.forEach(System.out::println);
-    }
-
-    private static List<Integer> addTenToList(int i) {
-        return List.of(i, 10);
-    }
-
-    @Test
-    public void testJsonBuilding() {
-        final JsonObject obj = new JsonObject();
-        final JsonObject obj2 = new JsonObject();
-        obj.addProperty("name", "vova");
-        obj.addProperty("age", "24");
-        obj2.add("Student", obj);
-
-        System.out.println(obj2.toString());
-    }
-
     @SuppressWarnings("deprecation")
     @Test
     public void givenSpriteMapFile_thenChecksum_verifying()
